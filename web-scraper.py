@@ -1,7 +1,13 @@
+#Python Web Sraber by KxroShinigami
+
+#ToDo: pysimplegui, time countdown
+
+
+
 import requests
 
 # Making a GET request
-r = requests.get('')
+r = requests.get('www.google.com')
 
 # check status code for response received
 # success code - 200
