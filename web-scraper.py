@@ -17,6 +17,7 @@ from tkinter import *
 from tkinter.ttk import *
 from PIL import Image, ImageTk
 from urllib.request import urlopen, Request
+import json
 
 # +--+--+--+--+--+--+
 #    Banner
@@ -30,8 +31,8 @@ from urllib.request import urlopen, Request
 
 WebsiteMediaMarkt_Angebote_ComputerBüro = "https://www.mediamarkt.de/de/campaign/angebote-computer-buero#root"
 WebsiteMediaMarkt_Angebote_GamingVR = "https://www.mediamarkt.de/de/campaign/angebote-gaming-vr#root"
-
-
+WebsiteAmazon_SpeedDeals = "https://www.amazon.de/s?k=grafikkarten&i=computers"
+                            
 # +--+--+--+--+--+--+
 #    Basic Functions
 
@@ -41,12 +42,14 @@ def PrintWebsite(GivenWebsite):
 def Scrape():
     #takes Website selected with RadioButton and calls function
     if(RBtext_var.get() == RBtexts[0]):
-        product_name, product_price, product_ratings, product_links = MediaMarkt(WebsiteMediaMarkt_Angebote_ComputerBüro)
-
-        for b in range(len(product_name)):
-            ttk.Label(scrollable_frame, text="+----------+\n" + str(product_name[b]) + "\n\n" + str(product_price[b]) + "\nStars:" + str(product_ratings[b]) + "\n\n" + "www.mediamarkt.de" + str(product_links[b])).pack()
+        x = MediaMarkt(WebsiteMediaMarkt_Angebote_ComputerBüro)
+        print(x)
     elif(RBtext_var.get() == RBtexts[1]):
-        MediaMarkt(WebsiteMediaMarkt_Angebote_GamingVR)
+        x = MediaMarkt(WebsiteMediaMarkt_Angebote_GamingVR)
+        print(x)
+    elif(RBtext_var.get() == RBtexts[2]):
+        x = Amazon(WebsiteAmazon_SpeedDeals)
+        print(x)
     else:
         print("WTF")
 
@@ -142,19 +145,27 @@ def MediaMarkt(Website):
     # +--+--+--+--+--+--+
     #    Output of relevant Information
 
+    product_list = {}
+
     for b in range(len(product_name)):
-        print(
-            "+----------+\n", product_name[b], 
-            "\n\n", product_price[b], 
-            "\nStars:", product_ratings[b],
-            "\n\n", "www.mediamarkt.de" + product_links[b])
+        product_list.update({
+            "Product " + str(b) : {
+                "name" : product_name[b],
+                "price" : product_price[b],
+                "rating" : product_ratings[b],
+                "link" : "www.mediamarkt.de" + product_links[b]
+                }
+            })
+
+    result = json.dumps(product_list, 
+                        indent = 6,
+                        separators =("", " = "))
     
-    return product_name, product_price, product_ratings, product_links
+    return result
 
 # /\/\/\/\/\/\/\/\/\/\/\
 #    MediaMarkt Website End
 # /\/\/\/\/\/\/\/\/\/\/\
-
 
 # +--+--+--+--+--+--+
 #    GUI
@@ -175,7 +186,9 @@ root.attributes('-topmost', 1) # Window always on top
 # +-+ Radiobutton Text +-+
 
 RBtext_var = tk.StringVar()
-RBtexts = ('MediaMarkt -> Angebote -> Computer & Büro', 'MediaMarkt -> Angebote -> Gaming & VR', '...')
+RBtexts = ('MediaMarkt -> Angebote -> Computer & Büro',
+            'MediaMarkt -> Angebote -> Gaming & VR',
+            'Amazon -> Speed Deals')
 
 # +-+ LabelFrame "Choose Website" with Radiobuttons +-+
 
@@ -200,28 +213,11 @@ scrape_button = ttk.Button(
 
 scrape_button.pack(side = TOP, fill = BOTH, expand = False)
 
-# +-+ LabelFrame Products +-+
+# +-+ LabelFrame Alarms +-+
 
 # Frame
-container = ttk.Frame(root)
-canvas = tk.Canvas(container)
-scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
-scrollable_frame = ttk.Frame(canvas)
-
-scrollable_frame.bind(
-    "<Configure>",
-    lambda e: canvas.configure(
-        scrollregion=canvas.bbox("all")
-    )
-)
-
-canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-
-canvas.configure(yscrollcommand=scrollbar.set)
-
-container.pack()
-canvas.pack(side="left", fill="both", expand=True)
-scrollbar.pack(side="right", fill="y")
+lf_ChooseWebsite = ttk.LabelFrame(root, text='Alarms')
+lf_ChooseWebsite.pack( fill = BOTH, expand = True)
 
 # +-+ Photos +-+
 
@@ -237,7 +233,7 @@ pil_img = Image.open(my_picture)
 
 tk_img = ImageTk.PhotoImage(pil_img)
 
-label = tk.Label(root, image=tk_img, width = 200, height = 200)
+label = tk.Label(root, image=tk_img, width = 300, height = 200)
 label.pack(side = TOP, padx = 5, pady = 5)
 
 # +-+ Button "Exit" +-+
