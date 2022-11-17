@@ -4,7 +4,7 @@ run-name: Testing the python packages
 
 on: 
   push:
-    branches: [ "main", "brain" ]
+    branches: [ "main" ]
 
 permissions:
   contents: read
